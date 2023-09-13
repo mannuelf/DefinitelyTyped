@@ -399,6 +399,99 @@ export namespace lists {
         _links: Link[];
     }
 
+    interface BatchListMembersOpts {
+      skipMergeValidation?: boolean;
+      skipDuplicateCheck?: boolean;
+    }
+
+    interface BatchListMembersResponse {
+      new_members?: MembersSuccessResponse[];
+      updated_members?: MembersSuccessResponse[];
+      errors?: Array<{
+        email_address: string;
+        error: string;
+        error_code: string;
+        field: string;
+        field_message: string;
+      }>;
+    }
+
+    type EmailType = "text"|"html";
+
+    interface BatchListMembersBodyMembersObject {
+      email_address: string;
+      email_type: EmailType;
+      status: Status;
+      vip?: boolean;
+      location?: {
+        latitude: number;
+        longtitude: number;
+      };
+      tags?: string[]; // non-documented tho still available to use
+      ip_signup?: string;
+      timestamp_signup?: string;
+      ip_opt?: string;
+      timestamp_opt?: string;
+      language?: string; // https://mailchimp.com/help/view-and-edit-contact-languages/
+      merge_fields?: {[k: string]: string}; // https://mailchimp.com/developer/marketing/docs/merge-fields/#structure
+    }
+
+    interface BatchListMembersBody {
+      members: BatchListMembersBodyMembersObject[];
+      sync_tags?: boolean;
+      update_existing?: boolean;
+    }
+
+    interface CreateListMemberEventBody extends Body {
+        name: string;
+        properties?: object | undefined;
+        is_syncing?: boolean | undefined;
+        occurred_at?: string | undefined;
+    }
+
+    interface Category {
+        list_id: string;
+        id: string;
+        title: string;
+        display_order: number;
+        type: string;
+        _links: Link[];
+    }
+
+    interface GetListInterestCategoriesResponse {
+        list_id: string;
+        categories: Category[];
+        total_items: number;
+        _links: Link[];
+    }
+
+    interface Interest {
+        category_id: string;
+        list_id: string;
+        id: string;
+        name: string;
+        subscriber_count: string;
+        display_order: number;
+        _links: Link[];
+    }
+
+    interface ListInterestCategoryInterestsResponse {
+        list_id: string;
+        category_id: string;
+        interests: Interest[];
+        total_items: number;
+        _links: Link[];
+    }
+
+    /**
+     * Batch subscribe or unsubscribe
+     * https://mailchimp.com/developer/marketing/api/lists/batch-subscribe-or-unsubscribe//
+     * @param listId The unique ID for the list.
+     * @param body
+     * @param opts Optional parameters
+     */
+    function batchListMembers(listId: string, body: BatchListMembersBody, opts?: BatchListMembersOpts): Promise<BatchListMembersResponse | ErrorResponse>;
+
     /**
      * Add or update a list member.
      * @param listId The unique ID for the list.
@@ -505,4 +598,32 @@ export namespace lists {
      * @return A {@link https://www.promisejs.org/|Promise}, with data of type {@link module:model/MergeFieldSuccessResponse}
      */
     function getListMergeFields(listId: string, opts?: ListOptions): Promise<MergeFieldSuccessResponse | ErrorResponse>;
+
+    /**
+     * Add an event for a list member.
+     * @param listId The unique ID for the list.
+     * @param subscriberHash The MD5 hash of the lowercase version of the list member's email address.
+     * @param body
+     * @param body.name The name for this type of event ('purchased', 'visited', etc). Must be 2-30 characters in length
+     * @param body.properties An optional list of properties
+     * @param body.is_syncing Events created with the is_syncing value set to true will not trigger automations.
+     * @param body.occurred_at The date and time the event occurred in ISO 8601 format.
+     * @return A {@link https://www.promisejs.org/|Promise}, with empty response
+     */
+    function createListMemberEvent(listId: string, subscriberHash: string, body: CreateListMemberEventBody): Promise<{} | ErrorResponse>;
+
+    /**
+     * Get a list of interest categories.
+     * @param listId The unique ID for the list.
+     * @return A {@link https://www.promisejs.org/|Promise}, with data of type {@link module:model/GetListInterestCategoriesResponse}
+     */
+    function getListInterestCategories(listId: string): Promise<GetListInterestCategoriesResponse | ErrorResponse>;
+
+    /**
+     * Get a list of interests in a specific interest category.
+     * @param listId The unique ID for the list.
+     * @param interestCategoryId The unique ID for the interest category.
+     * @return A {@link https://www.promisejs.org/|Promise}, with data of type {@link module:model/ListInterestCategoryInterestsResponse}
+     */
+    function listInterestCategoryInterests(listId: string, interestCategoryId: string): Promise<ListInterestCategoryInterestsResponse | ErrorResponse>;
 }

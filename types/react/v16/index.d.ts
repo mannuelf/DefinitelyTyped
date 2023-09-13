@@ -52,12 +52,13 @@ type NativeTransitionEvent = TransitionEvent;
 type NativeUIEvent = UIEvent;
 type NativeWheelEvent = WheelEvent;
 type Booleanish = boolean | 'true' | 'false';
+type CrossOrigin = 'anonymous' | 'use-credentials' | '' | undefined;
 
 declare const UNDEFINED_VOID_ONLY: unique symbol;
 // Destructors are only allowed to return void.
 type Destructor = () => void | { [UNDEFINED_VOID_ONLY]: never };
 
-// eslint-disable-next-line export-just-namespace
+// eslint-disable-next-line @definitelytyped/export-just-namespace
 export = React;
 export as namespace React;
 
@@ -1311,7 +1312,7 @@ declare namespace React {
     // ----------------------------------------------------------------------
 
     /**
-     * @deprecated. This was used to allow clients to pass `ref` and `key`
+     * @deprecated This was used to allow clients to pass `ref` and `key`
      * to `createElement`, which is no longer necessary due to intersection
      * types. If you need to declare a props object before passing it to
      * `createElement` or a factory, use `ClassAttributes<T>`:
@@ -1337,6 +1338,9 @@ declare namespace React {
 
     interface SVGProps<T> extends SVGAttributes<T>, ClassAttributes<T> {
     }
+
+    interface SVGLineElementAttributes<T> extends SVGProps<T> {}
+    interface SVGTextElementAttributes<T> extends SVGProps<T> {}
 
     interface DOMAttributes<T> {
         children?: ReactNode | undefined;
@@ -1908,7 +1912,7 @@ declare namespace React {
         colSpan?: number | undefined;
         controls?: boolean | undefined;
         coords?: string | undefined;
-        crossOrigin?: "anonymous" | "use-credentials" | "" | undefined;
+        crossOrigin?: CrossOrigin;
         data?: string | undefined;
         dateTime?: string | undefined;
         default?: boolean | undefined;
@@ -2143,7 +2147,7 @@ declare namespace React {
 
     interface ImgHTMLAttributes<T> extends HTMLAttributes<T> {
         alt?: string | undefined;
-        crossOrigin?: "anonymous" | "use-credentials" | "" | undefined;
+        crossOrigin?: CrossOrigin;
         decoding?: "async" | "auto" | "sync" | undefined;
         height?: number | string | undefined;
         loading?: "eager" | "lazy" | undefined;
@@ -2191,7 +2195,6 @@ declare namespace React {
         autoComplete?: string | undefined;
         capture?: boolean | string | undefined; // https://www.w3.org/TR/html-media-capture/#the-capture-attribute
         checked?: boolean | undefined;
-        crossOrigin?: "anonymous" | "use-credentials" | "" | undefined;
         disabled?: boolean | undefined;
         form?: string | undefined;
         formAction?: string | undefined;
@@ -2241,7 +2244,8 @@ declare namespace React {
 
     interface LinkHTMLAttributes<T> extends HTMLAttributes<T> {
         as?: string | undefined;
-        crossOrigin?: "anonymous" | "use-credentials" | "" | undefined;
+        crossOrigin?: CrossOrigin;
+        fetchPriority?: "high" | "low" | "auto";
         href?: string | undefined;
         hrefLang?: string | undefined;
         integrity?: string | undefined;
@@ -2265,7 +2269,7 @@ declare namespace React {
         autoPlay?: boolean | undefined;
         controls?: boolean | undefined;
         controlsList?: string | undefined;
-        crossOrigin?: "anonymous" | "use-credentials" | "" | undefined;
+        crossOrigin?: CrossOrigin;
         loop?: boolean | undefined;
         mediaGroup?: string | undefined;
         muted?: boolean | undefined;
@@ -2349,7 +2353,7 @@ declare namespace React {
         async?: boolean | undefined;
         /** @deprecated */
         charSet?: string | undefined;
-        crossOrigin?: "anonymous" | "use-credentials" | "" | undefined;
+        crossOrigin?: CrossOrigin;
         defer?: boolean | undefined;
         integrity?: string | undefined;
         noModule?: boolean | undefined;
@@ -2482,7 +2486,7 @@ declare namespace React {
         // Other HTML properties supported by SVG elements in browsers
         role?: AriaRole | undefined;
         tabIndex?: number | undefined;
-        crossOrigin?: "anonymous" | "use-credentials" | "" | undefined;
+        crossOrigin?: CrossOrigin;
 
         // SVG Specific attributes
         accentHeight?: number | string | undefined;
@@ -3019,6 +3023,19 @@ declare namespace React {
          */
         componentStack: string;
     }
+
+    namespace JSX {
+        interface Element extends GlobalJSXElement {}
+        interface ElementClass extends GlobalJSXElementClass {}
+        interface ElementAttributesProperty extends GlobalJSXElementAttributesProperty {}
+        interface ElementChildrenAttribute extends GlobalJSXElementChildrenAttribute {}
+
+        type LibraryManagedAttributes<C, P> = GlobalJSXLibraryManagedAttributes<C, P>;
+
+        interface IntrinsicAttributes extends GlobalJSXIntrinsicAttributes {}
+        interface IntrinsicClassAttributes<T> extends GlobalJSXIntrinsicClassAttributes<T> {}
+        interface IntrinsicElements extends GlobalJSXIntrinsicElements {}
+    }
 }
 
 // naked 'any' type in a conditional type will short circuit and union both the then/else branches
@@ -3066,6 +3083,9 @@ type ReactManagedAttributes<C, P> = C extends { propTypes: infer T; defaultProps
             : P;
 
 declare global {
+    /**
+     * @deprecated Use `React.JSX` instead of the global `JSX` namespace.
+     */
     namespace JSX {
         // tslint:disable-next-line:no-empty-interface
         interface Element extends React.ReactElement<any, any> { }
@@ -3248,7 +3268,7 @@ declare global {
             foreignObject: React.SVGProps<SVGForeignObjectElement>;
             g: React.SVGProps<SVGGElement>;
             image: React.SVGProps<SVGImageElement>;
-            line: React.SVGProps<SVGLineElement>;
+            line: React.SVGLineElementAttributes<SVGLineElement>;
             linearGradient: React.SVGProps<SVGLinearGradientElement>;
             marker: React.SVGProps<SVGMarkerElement>;
             mask: React.SVGProps<SVGMaskElement>;
@@ -3263,7 +3283,7 @@ declare global {
             stop: React.SVGProps<SVGStopElement>;
             switch: React.SVGProps<SVGSwitchElement>;
             symbol: React.SVGProps<SVGSymbolElement>;
-            text: React.SVGProps<SVGTextElement>;
+            text: React.SVGTextElementAttributes<SVGTextElement>;
             textPath: React.SVGProps<SVGTextPathElement>;
             tspan: React.SVGProps<SVGTSpanElement>;
             use: React.SVGProps<SVGUseElement>;
@@ -3271,3 +3291,18 @@ declare global {
         }
     }
 }
+
+// React.JSX needs to point to global.JSX to keep global module augmentations intact.
+// But we can't access global.JSX so we need to create these aliases instead.
+// Once the global JSX namespace will be removed we replace React.JSX with the contents of global.JSX
+interface GlobalJSXElement extends JSX.Element {}
+interface GlobalJSXElementClass extends JSX.ElementClass {}
+interface GlobalJSXElementAttributesProperty extends JSX.ElementAttributesProperty {}
+interface GlobalJSXElementChildrenAttribute extends JSX.ElementChildrenAttribute {}
+
+type GlobalJSXLibraryManagedAttributes<C, P> = JSX.LibraryManagedAttributes<C, P>;
+
+interface GlobalJSXIntrinsicAttributes extends JSX.IntrinsicAttributes {}
+interface GlobalJSXIntrinsicClassAttributes<T> extends JSX.IntrinsicClassAttributes<T> {}
+
+interface GlobalJSXIntrinsicElements extends JSX.IntrinsicElements {}

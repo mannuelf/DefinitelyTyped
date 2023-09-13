@@ -10,21 +10,27 @@
 // disable automatic export
 export {};
 
-// Uses ArrayLike to admit Unit8 and co.
+// Uses ArrayLike to admit Uint8 and co.
 type OutputBuffer = ArrayLike<number>;
 type InputBuffer = ArrayLike<number>;
 
 interface RandomOptions {
+    /** `Array` of 16 random bytes (0-255) */
     random?: InputBuffer | undefined;
 }
 interface RngOptions {
+    /** Alternative to `options.random`, a `Function` that returns an `Array` of 16 random bytes (0-255) */
     rng?: (() => InputBuffer) | undefined;
 }
 
 interface V1BaseOptions {
+    /** RFC "node" field as an `Array[6]` of byte values (per 4.1.6) */
     node?: InputBuffer | undefined;
+    /** RFC "clock sequence" as a `Number` between 0 - 0x3fff */
     clockseq?: number | undefined;
+    /** RFC "timestamp" field (`Number` of milliseconds, unix epoch) */
     msecs?: number | Date | undefined;
+    /** RFC "timestamp" field (`Number` of nanoseconds to add to msecs, should be 0-10,000) */
     nsecs?: number | undefined;
 }
 interface V1RandomOptions extends V1BaseOptions, RandomOptions {}
@@ -42,7 +48,12 @@ type v4Buffer = <T extends OutputBuffer>(options: V4Options | null | undefined, 
 type v4 = v4Buffer & v4String;
 
 type v3String = (name: string | InputBuffer, namespace: string | InputBuffer) => string;
-type v3Buffer = <T extends OutputBuffer>(name: string | InputBuffer, namespace: string | InputBuffer, buffer: T, offset?: number) => T;
+type v3Buffer = <T extends OutputBuffer>(
+    name: string | InputBuffer,
+    namespace: string | InputBuffer,
+    buffer: T,
+    offset?: number,
+) => T;
 interface v3Static {
     // https://github.com/uuidjs/uuid/blob/master/src/v35.js#L22
     DNS: string;
@@ -52,7 +63,12 @@ interface v3Static {
 type v3 = v3Buffer & v3String & v3Static;
 
 type v5String = (name: string | InputBuffer, namespace: string | InputBuffer) => string;
-type v5Buffer = <T extends OutputBuffer>(name: string | InputBuffer, namespace: string | InputBuffer, buffer: T, offset?: number) => T;
+type v5Buffer = <T extends OutputBuffer>(
+    name: string | InputBuffer,
+    namespace: string | InputBuffer,
+    buffer: T,
+    offset?: number,
+) => T;
 interface v5Static {
     // https://github.com/uuidjs/uuid/blob/master/src/v35.js#L22
     DNS: string;

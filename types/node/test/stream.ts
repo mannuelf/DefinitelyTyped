@@ -521,6 +521,9 @@ function stream_readable_pipe_test() {
     r.close();
     z.close();
     rs.close();
+
+    rs.destroy();
+    rs[Symbol.asyncDispose]();
 }
 
 function stream_duplex_allowHalfOpen_test() {
@@ -600,6 +603,54 @@ addAbortSignal(new AbortSignal(), new Readable());
     // When the param includes unsupported WritableStream
     // @ts-expect-error
     Writable.fromWeb(web, { write: true });
+}
+
+{
+    const duplex = new Duplex();
+    // $ExpectType { readable: ReadableStream<any>; writable: WritableStream<any>; }
+    Duplex.toWeb(duplex);
+}
+
+{
+    const readable = new ReadableStream();
+    const writable = new WritableStream();
+
+    // $ExpectType Duplex
+    Duplex.fromWeb({ readable, writable });
+
+    // Handles subset of DuplexOptions param
+    // $ExpectType Duplex
+    Duplex.fromWeb({ readable, writable }, { objectMode: true });
+
+    // When the param includes unsupported DuplexOptions
+    // @ts-expect-error
+    Duplex.fromWeb({ readable, writable }, { emitClose: true });
+
+    // $ExpectType Duplex
+    Duplex.from(readable);
+
+    // $ExpectType Duplex
+    Duplex.from(writable);
+}
+
+function testReadableReduce() {
+    const readable = Readable.from([]);
+    // $ExpectType Promise<number>
+    readable.reduce((prev, data) => prev * data);
+    // $ExpectType Promise<number>
+    readable.reduce((prev, data) => prev * data, 1);
+    // @ts-expect-error when specifying an initial value, its type must be consistent with the reducer's return type
+    readable.reduce((prev, data) => prev * data, "1");
+    // @ts-expect-error when specifying an initial value, its type must be consistent with the reducer's first argument
+    readable.reduce((prev: string, data) => +prev * data, 1);
+}
+
+function testReadableFind() {
+    const readable = Readable.from([]);
+    // $ExpectType Promise<any>
+    readable.find(Boolean);
+    // $ExpectType Promise<any[] | undefined>
+    readable.find(Array.isArray);
 }
 
 async function testReadableStream() {

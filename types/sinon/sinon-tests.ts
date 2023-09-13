@@ -72,6 +72,8 @@ function testSandbox() {
 
     sb.replace(replaceMe, 'prop', 10);
     sb.replace(replaceMe, 'method', sb.spy());
+    const fake = sb.replace(replaceMe, 'method', sb.fake.returns(2));
+    fake.callCount;
     sb.replaceGetter(replaceMe, 'getter', () => 14);
     sb.replaceSetter(replaceMe, 'setter', v => {});
 
@@ -878,6 +880,22 @@ function testMock() {
     const mock = sinon.mock(obj);
 
     mock.expects('method').atLeast(2).atMost(5);
+    mock.restore();
+    mock.verify();
+}
+
+function testMockStatic() {
+    const mock = sinon.mock();
+
+    mock.atLeast(2).atMost(5);
+    mock.restore();
+    mock.verify();
+}
+
+function testMockStaticNamed() {
+    const mock = sinon.mock('namedMock');
+
+    mock.atLeast(2).atMost(5);
     mock.restore();
     mock.verify();
 }

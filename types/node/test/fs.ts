@@ -228,6 +228,43 @@ async function testPromisify() {
 }
 
 {
+    const bigIntStatsListener: fs.BigIntStatsListener = (current: fs.BigIntStats, previous: fs.BigIntStats) => {
+        console.log(current, previous);
+    };
+    fs.unwatchFile('/tmp/file', bigIntStatsListener);
+
+    const statsListener: fs.StatsListener = (current: fs.Stats, previous: fs.Stats) => {
+        console.log(current, previous);
+    };
+    fs.unwatchFile('/tmp/file', statsListener);
+}
+
+{
+    // @ts-expect-error
+    const invalidStatsListener: fs.StatsListener = (current: fs.BigIntStats, previous: fs.BigIntStats) => {
+        console.log(current, previous);
+    };
+    // @ts-expect-error
+    const invalidBigIntStatsListener: fs.BigIntStatsListener = (current: fs.Stats, previous: fs.Stats) => {
+        console.log(current, previous);
+    };
+}
+
+{
+    const bigIntStatsListener: fs.BigIntStatsListener = (current: fs.BigIntStats, previous: fs.BigIntStats) => {
+        console.log(current, previous);
+    };
+    const statsListener = (current: fs.Stats, previous: fs.Stats) => {
+        console.log(current, previous);
+    };
+
+    // @ts-expect-error
+    fs.watchFile('/tmp/file', bigIntStatsListener);
+    // @ts-expect-error
+    fs.watchFile('/tmp/file', { bigint: true }, statsListener);
+}
+
+{
     fs.access('/path/to/folder', (err) => { });
 
     fs.access(Buffer.from(''), (err) => { });
@@ -363,9 +400,9 @@ async function testPromisify() {
     let buffers: Promise<Buffer[]>;
     let entries: Promise<fs.Dirent[]>;
 
-    names = fs.promises.readdir('/path/to/dir', { encoding: 'utf8', withFileTypes: false });
-    buffers = fs.promises.readdir('/path/to/dir', { encoding: 'buffer', withFileTypes: false });
-    entries = fs.promises.readdir('/path/to/dir', { encoding: 'utf8', withFileTypes: true });
+    names = fs.promises.readdir('/path/to/dir', { encoding: 'utf8', withFileTypes: false, recursive: true });
+    buffers = fs.promises.readdir('/path/to/dir', { encoding: 'buffer', withFileTypes: false, recursive: true });
+    entries = fs.promises.readdir('/path/to/dir', { encoding: 'utf8', withFileTypes: true, recursive: true });
 }
 
 {
@@ -392,6 +429,23 @@ async function testPromisify() {
     fs.open('test', undefined, (err, fd) => {});
     fs.open('test', 'r', 0o666, (err, fd) => {});
     fs.open('test', 'r', undefined, (err, fd) => {});
+}
+
+{
+    (async () => {
+        // $ExpectType Blob
+        const blob = await fs.openAsBlob('the.file.txt');
+    });
+    (async () => {
+        // $ExpectType Blob
+        const blob = await fs.openAsBlob('the.file.txt', {});
+    });
+    (async () => {
+        // $ExpectType Blob
+        const blob = await fs.openAsBlob('the.file.txt', {
+            type: 'text/ecmascript',
+        });
+    });
 }
 
 {
@@ -434,16 +488,19 @@ async function testPromisify() {
     const dirEntProm: Promise<fs.Dir> = fs.promises.opendir('test', {
         encoding: 'utf8',
         bufferSize: 42,
+        recursive: false,
     });
 
     const dirEntBufferProm: Promise<fs.Dir> = fs.promises.opendir(Buffer.from('test'), {
         encoding: 'utf8',
         bufferSize: 42,
+        recursive: false,
     });
 
     const dirEntUrlProm: Promise<fs.Dir> = fs.promises.opendir(new URL(`file://${__dirname}`), {
         encoding: 'utf8',
         bufferSize: 42,
+        recursive: false,
     });
 }
 
@@ -486,6 +543,7 @@ async () => {
     fs.createWriteStream('./index.d.ts', { encoding: 'utf8' });
     // @ts-expect-error
     fs.createWriteStream('./index.d.ts', { encoding: 'invalid encoding' });
+    fs.createWriteStream('./index.d.ts', { fs: { write: fs.write }, signal: new AbortSignal() });
 
     fs.createReadStream('./index.d.ts');
     fs.createReadStream('./index.d.ts', 'utf8');
@@ -494,6 +552,7 @@ async () => {
     fs.createReadStream('./index.d.ts', { encoding: 'utf8' });
     // @ts-expect-error
     fs.createReadStream('./index.d.ts', { encoding: 'invalid encoding' });
+    fs.createReadStream('./index.d.ts', { fs: { read: fs.read }, signal: new AbortSignal() });
 }
 
 async () => {

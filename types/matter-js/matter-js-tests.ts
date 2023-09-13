@@ -66,6 +66,15 @@ const vertex: Matter.Vertex = {
     body: body,
     isInternal: false,
 };
+
+Body.setSpeed(box1, 1);
+// $ExpectType number
+Body.getSpeed(box1);
+
+Body.setAngularSpeed(box1, 1);
+// $ExpectType number
+Body.getAngularSpeed(box1);
+
 // $ExpectType Body
 Bodies.fromVertices(1, 2, [[vertex, { x: 3, y: 4 }]]);
 
@@ -110,6 +119,11 @@ var constraint1 = Constraint.create({
 });
 
 World.addConstraint(engine.world, constraint1);
+
+// $ExpectType Body | null
+var bodyA = constraint1.bodyA;
+// $ExpectType Body | null
+var bodyB = constraint1.bodyB;
 
 // Query
 // $ExpectType Collision[]
@@ -188,6 +202,8 @@ Composite.add(composite1, constraint1);
 Composite.add(composite1, mouseConstraint);
 // $ExpectType Composite
 Composite.add(composite3, [box1, composite2, constraint1, mouseConstraint]);
+// $ExpectType Composite
+Composite.remove(composite3, [box1, composite2, constraint1, mouseConstraint]);
 
 // Pairs
 // $ExpectType Pairs

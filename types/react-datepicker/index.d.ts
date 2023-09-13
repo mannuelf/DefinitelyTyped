@@ -1,4 +1,4 @@
-// Type definitions for react-datepicker 4.11
+// Type definitions for react-datepicker 4.15
 // Project: https://github.com/Hacker0x01/react-datepicker
 // Definitions by: Rajab Shakirov <https://github.com/radziksh>
 //                 Greg Smith <https://github.com/smrq>
@@ -6,7 +6,6 @@
 //                 Koala Human <https://github.com/KoalaHuman>
 //                 Justin Grant <https://github.com/justingrant>
 //                 Jake Boone <https://github.com/jakeboone02>
-//                 Roman Nuritdinov <https://github.com/Ky6uk>
 //                 Avi Klaiman <https://github.com/aviklai>
 //                 Naoki Sekiguchi <https://github.com/seckie>
 //                 Kerry Gougeon <https://github.com/kerry-g>
@@ -158,6 +157,7 @@ export interface ReactDatePickerProps<
     readOnly?: boolean | undefined;
     renderCustomHeader?(params: ReactDatePickerCustomHeaderProps): React.ReactNode;
     renderDayContents?(dayOfMonth: number, date?: Date): React.ReactNode;
+    renderMonthContent?(monthIndex: number, shortMonthText: string, fullMonthText: string): React.ReactNode;
     required?: boolean | undefined;
     scrollableMonthYearDropdown?: boolean | undefined;
     scrollableYearDropdown?: boolean | undefined;
@@ -182,6 +182,7 @@ export interface ReactDatePickerProps<
     showWeekNumbers?: boolean | undefined;
     showYearDropdown?: boolean | undefined;
     showYearPicker?: boolean | undefined;
+    showIcon?: boolean | undefined;
     startDate?: Date | null | undefined;
     startOpen?: boolean | undefined;
     strictParsing?: boolean | undefined;

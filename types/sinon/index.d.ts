@@ -775,7 +775,7 @@ declare namespace Sinon {
     }
 
     interface SinonMockStatic {
-        (): SinonExpectation;
+        (name?: string): SinonExpectation;
         /**
          * Creates a mock for the provided object.
          * Does not change the object, but returns a mock object to set expectations on the object’s methods.
@@ -1628,7 +1628,7 @@ declare namespace Sinon {
          * replacement can be any value, including spies, stubs and fakes.
          * This method only works on non-accessor properties, for replacing accessors, use sandbox.replaceGetter() and sandbox.replaceSetter().
          */
-        replace<T, TKey extends keyof T>(obj: T, prop: TKey, replacement: T[TKey]): T[TKey];
+        replace<T, TKey extends keyof T, R extends T[TKey] = T[TKey]>(obj: T, prop: TKey, replacement: R): R;
         /**
          * Replaces getter for property on object with replacement argument. Attempts to replace an already replaced getter cause an exception.
          * replacement must be a Function, and can be instances of spies, stubs and fakes.

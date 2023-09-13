@@ -83,7 +83,7 @@ const ComponentWithChildren3: React.FunctionComponent<React.PropsWithChildren<Co
 <ComponentWithChildren3 bar="42"></ComponentWithChildren3>;
 
 // svg sanity check
-<svg viewBox="0 0 1000 1000">
+<svg suppressHydrationWarning viewBox="0 0 1000 1000">
     <g>
         <text x="200" y="300" strokeWidth="5" stroke="black" alignmentBaseline="middle">
             Hello, world!
@@ -502,7 +502,7 @@ const HasHref2: React.ElementType<{ href?: string | undefined }> = 'div';
 const CustomElement: React.ElementType = 'my-undeclared-element';
 
 // custom elements now need to be declared as intrinsic elements
-declare global {
+declare module 'react' {
     namespace JSX {
         interface IntrinsicElements {
             'my-declared-element': {};
@@ -510,7 +510,21 @@ declare global {
     }
 }
 
-const CustomElement2: React.ElementType = 'my-declared-element';
+// Augmentations of the global namespace flow into the scoped JSX namespace
+// This is deprecated and will be removed in next next major of `@types/react`
+declare global {
+    namespace JSX {
+        interface IntrinsicElements {
+            'my-declared-element-deprecated': {};
+        }
+    }
+}
+
+const CustomElement2: React.ElementType = 'my-declared-element-deprecated';
+<my-declared-element-deprecated />;
+
+const CustomElement3: React.ElementType = 'my-declared-element';
+<my-declared-element />;
 
 interface TestPropTypesProps {
     foo: string;
@@ -590,6 +604,10 @@ function reactNodeTests() {
         }
     </div>;
     <div>{createChildren()}</div>;
+    // @ts-expect-error plain objects are not allowed
+    <div>{{ dave: true }}</div>;
+    // Will not type-check in a real project but accepted in DT tests since experimental.d.ts is part of compilation.
+    <div>{Promise.resolve('React')}</div>;
 }
 
 function elementTypeTests() {
@@ -653,6 +671,39 @@ function elementTypeTests() {
     class RenderReactNode extends React.Component<{children?: React.ReactNode}> {
         render() {
           return this.props.children;
+        }
+    }
+
+    const ReturnPromise = () => Promise.resolve('React');
+    // @ts-expect-error experimental release channel only
+    const FCPromise: React.FC = ReturnPromise;
+    class RenderPromise extends React.Component {
+        // Will not type-check in a real project but accepted in DT tests since experimental.d.ts is part of compilation.
+        render() {
+          return Promise.resolve('React');
+        }
+    }
+
+    const ReturnWithLegacyContext = (props: { foo: string }, context: { bar: number }) => {
+        return (
+            <div>
+                foo: {props.foo}, bar: {context.bar}
+            </div>
+        );
+    };
+    const FCWithLegacyContext: React.FC<{ foo: string }> = ReturnWithLegacyContext;
+
+    class RenderWithLegacyContext extends React.Component {
+        static contextTypes = { foo: PropTypes.node.isRequired };
+
+        constructor(props: {}, context: {}) {
+            super(props, context);
+        }
+
+        render() {
+            // $ExpectType unknown
+            this.context;
+            return (this.context as any).foo;
         }
     }
 
@@ -727,6 +778,21 @@ function elementTypeTests() {
     React.createElement(ReturnReactNode);
     <RenderReactNode />;
     React.createElement(RenderReactNode);
+
+    // @ts-expect-error Only available in experimental release channel
+    <ReturnPromise />;
+    // @ts-expect-error Only available in experimental release channel
+    React.createElement(ReturnPromise);
+    // Will not type-check in a real project but accepted in DT tests since experimental.d.ts is part of compilation.
+    <RenderPromise />;
+    // Will not type-check in a real project but accepted in DT tests since experimental.d.ts is part of compilation.
+    React.createElement(RenderPromise);
+
+    <ReturnWithLegacyContext foo="one" />;
+    React.createElement(ReturnWithLegacyContext, {foo: 'one'});
+
+    <RenderWithLegacyContext />;
+    React.createElement(RenderWithLegacyContext);
 }
 
 function managingRefs() {

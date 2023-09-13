@@ -239,6 +239,10 @@ declare namespace editorClient {
          * Read more: https://nodered.org/docs/creating-nodes/properties#custom-edit-behaviour
          */
         onpaletteremove?: ((this: NodeInstance<TInstProps>) => void) | undefined;
+        /**
+         * Called when the node type is dragged into workspace.
+         */
+        onadd?: ((this: NodeInstance<TInstProps>) => void) | undefined;
     }
 
     interface CommSubscriber {
@@ -389,7 +393,7 @@ declare namespace editorClient {
          */
         registerNodeType<TProps extends NodeProperties, TCreds = undefined, TInstProps extends TProps = TProps>(
             nt: string,
-            def: NodeDef<TProps, TCreds, TInstProps>, // eslint-disable-line no-unnecessary-generics
+            def: NodeDef<TProps, TCreds, TInstProps>, // eslint-disable-line @definitelytyped/no-unnecessary-generics
         ): void;
         removeNodeType(nt: string): void;
         getNodeType(nt: string): NodeDef<NodeProperties>;
@@ -619,7 +623,7 @@ declare namespace editorClient {
         add(name: string, handler: () => void): void;
         remove(name: string): void;
         get(name: string): () => void;
-        invoke(name: string, args: any): void;
+        invoke(name: string, ...args: any): void;
         list(): Array<{ id: string; scope?: string | undefined; key?: string | undefined; user?: boolean | undefined }>;
     }
 
@@ -1575,7 +1579,7 @@ declare namespace editorClient {
          *
          * More info: https://nodered.org/docs/api/ui/editableList/
          */
-        <T>(opts: WidgetEditableListOptions<T>): this; // eslint-disable-line no-unnecessary-generics
+        <T>(opts: WidgetEditableListOptions<T>): this; // eslint-disable-line @definitelytyped/no-unnecessary-generics
         /**
          * Adds an item to the end of the list.         *
          * @param value - An object that will be associated with the item in the list.
@@ -1680,7 +1684,7 @@ declare namespace editorClient {
         /** An icon to display in the type menu */
         icon?: string | undefined;
         /** If the type has a fixed set of values, this is an array of string options for the value. For example, ["true","false"] for the boolean type. */
-        options?: string[] | undefined;
+        options?: string[] | Array<{ value: string; label: string }> | undefined;
         /** Set to false if there is no value associated with the type. */
         hasValue?: boolean | undefined;
         /** A function to validate the value for the type. */

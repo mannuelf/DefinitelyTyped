@@ -428,6 +428,8 @@ interface XRSession extends EventTarget {
     readonly visibilityState: XRVisibilityState;
     readonly frameRate?: number | undefined;
     readonly supportedFrameRates?: Float32Array | undefined;
+    readonly enabledFeatures?: string[] | undefined;
+    readonly isSystemKeyboardSupported: boolean;
 
     /**
      * Removes a callback from the animation frame painting callback from
@@ -661,6 +663,19 @@ interface XRPlane {
 }
 
 declare abstract class XRPlane implements XRPlane {}
+
+// Mesh detection
+type XRMeshSet = Set<XRMesh>;
+
+interface XRMesh {
+    meshSpace: XRSpace;
+    vertices: Float32Array;
+    indices: Float32Array;
+    lastChangedTime: number;
+    semanticLabel?: string;
+}
+
+declare abstract class XRMesh implements XRMesh {}
 
 interface XRSession {
     // Legacy

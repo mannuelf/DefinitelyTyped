@@ -5,7 +5,7 @@ declare namespace GorillaEngine.UI {
         right: number;
         bottom: number;
     }
-    interface ComboBoxPopupStyles {
+    interface ComboBoxPopupStyles extends Font {
         backgroundColor: string;
         itemTextColor: string;
         itemSelectedTextColor: string;

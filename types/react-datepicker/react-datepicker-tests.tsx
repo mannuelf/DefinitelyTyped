@@ -55,7 +55,7 @@ const topLogger: Modifier<'topLogger'> = {
     dropdownMode="scroll"
     endDate={new Date()}
     excludeDates={[new Date()]}
-    excludeDateIntervals={[{start: new Date(), end: new Date()}]}
+    excludeDateIntervals={[{ start: new Date(), end: new Date() }]}
     excludeTimes={[new Date()]}
     filterDate={date => true}
     filterTime={date => true}
@@ -66,7 +66,7 @@ const topLogger: Modifier<'topLogger'> = {
     highlightDates={[{ someClassName: [new Date()] }]}
     id=""
     includeDates={[new Date()]}
-    includeDateIntervals={[{start: new Date(), end: new Date()}]}
+    includeDateIntervals={[{ start: new Date(), end: new Date() }]}
     includeTimes={[new Date()]}
     injectTimes={[new Date()]}
     inline
@@ -151,6 +151,7 @@ const topLogger: Modifier<'topLogger'> = {
         nextYearButtonDisabled,
     }) => <div />}
     renderDayContents={(dayOfMonth, date) => <div />}
+    renderMonthContent={(monthIndex, shortMonth, longMonth) => <div />}
     required
     scrollableMonthYearDropdown
     scrollableYearDropdown
@@ -182,6 +183,7 @@ const topLogger: Modifier<'topLogger'> = {
     timeInputLabel=""
     timeIntervals={1}
     title=""
+    showIcon
     todayButton={<div />}
     useShortMonthInDropdown
     useWeekdaysShort

@@ -62,8 +62,9 @@ type NativeTouchEvent = TouchEvent;
 type NativeTransitionEvent = TransitionEvent;
 type NativeUIEvent = UIEvent;
 type NativeWheelEvent = WheelEvent;
+type CrossOrigin = 'anonymous' | 'use-credentials' | '' | undefined;
 
-// eslint-disable-next-line export-just-namespace
+// eslint-disable-next-line @definitelytyped/export-just-namespace
 export = React;
 export as namespace React;
 
@@ -565,7 +566,7 @@ declare namespace React {
     // ----------------------------------------------------------------------
 
     /**
-     * @deprecated. This was used to allow clients to pass `ref` and `key`
+     * @deprecated This was used to allow clients to pass `ref` and `key`
      * to `createElement`, which is no longer necessary due to intersection
      * types. If you need to declare a props object before passing it to
      * `createElement` or a factory, use `ClassAttributes<T>`:
@@ -591,6 +592,9 @@ declare namespace React {
 
     interface SVGProps<T> extends SVGAttributes<T>, ClassAttributes<T> {
     }
+
+    interface SVGLineElementAttributes<T> extends React.SVGProps<T> {}
+    interface SVGTextElementAttributes<T> extends React.SVGProps<T> {}
 
     interface DOMAttributes<T> {
         children?: ReactNode | undefined;
@@ -2675,7 +2679,7 @@ declare namespace React {
         colSpan?: number | undefined;
         controls?: boolean | undefined;
         coords?: string | undefined;
-        crossOrigin?: "anonymous" | "use-credentials" | "" | undefined;
+        crossOrigin?: CrossOrigin;
         data?: string | undefined;
         dateTime?: string | undefined;
         default?: boolean | undefined;
@@ -2873,7 +2877,7 @@ declare namespace React {
 
     interface ImgHTMLAttributes<T> extends HTMLAttributes<T> {
         alt?: string | undefined;
-        crossOrigin?: "anonymous" | "use-credentials" | "" | undefined;
+        crossOrigin?: CrossOrigin;
         height?: number | string | undefined;
         sizes?: string | undefined;
         src?: string | undefined;
@@ -2893,7 +2897,6 @@ declare namespace React {
         autoComplete?: string | undefined;
         capture?: boolean | string | undefined; // https://www.w3.org/TR/html-media-capture/#the-capture-attribute
         checked?: boolean | undefined;
-        crossOrigin?: "anonymous" | "use-credentials" | "" | undefined;
         disabled?: boolean | undefined;
         form?: string | undefined;
         formAction?: string | undefined;
@@ -2943,7 +2946,8 @@ declare namespace React {
 
     interface LinkHTMLAttributes<T> extends HTMLAttributes<T> {
         as?: string | undefined;
-        crossOrigin?: "anonymous" | "use-credentials" | "" | undefined;
+        crossOrigin?: CrossOrigin;
+        fetchPriority?: "high" | "low" | "auto";
         href?: string | undefined;
         hrefLang?: string | undefined;
         integrity?: string | undefined;
@@ -2964,7 +2968,7 @@ declare namespace React {
     interface MediaHTMLAttributes<T> extends HTMLAttributes<T> {
         autoPlay?: boolean | undefined;
         controls?: boolean | undefined;
-        crossOrigin?: "anonymous" | "use-credentials" | "" | undefined;
+        crossOrigin?: CrossOrigin;
         loop?: boolean | undefined;
         mediaGroup?: string | undefined;
         muted?: boolean | undefined;
@@ -3042,7 +3046,7 @@ declare namespace React {
     interface ScriptHTMLAttributes<T> extends HTMLAttributes<T> {
         async?: boolean | undefined;
         charSet?: string | undefined;
-        crossOrigin?: "anonymous" | "use-credentials" | "" | undefined;
+        crossOrigin?: CrossOrigin;
         defer?: boolean | undefined;
         integrity?: string | undefined;
         nonce?: string | undefined;
@@ -3627,9 +3631,23 @@ declare namespace React {
         item(index: number): Touch;
         identifiedTouch(identifier: number): Touch;
     }
+
+    namespace JSX {
+        interface Element extends GlobalJSXElement {}
+        interface ElementClass extends GlobalJSXElementClass {}
+        interface ElementAttributesProperty extends GlobalJSXElementAttributesProperty {}
+        interface ElementChildrenAttribute extends GlobalJSXElementChildrenAttribute {}
+
+        interface IntrinsicAttributes extends GlobalJSXIntrinsicAttributes {}
+        interface IntrinsicClassAttributes<T> extends GlobalJSXIntrinsicClassAttributes<T> {}
+        interface IntrinsicElements extends GlobalJSXIntrinsicElements {}
+    }
 }
 
 declare global {
+    /**
+     * @deprecated Use `React.JSX` instead of the global `JSX` namespace.
+     */
     namespace JSX {
         interface Element extends React.ReactElement { }
         interface ElementClass extends React.Component<any> {
@@ -3798,7 +3816,7 @@ declare global {
             foreignObject: React.SVGProps<SVGForeignObjectElement>;
             g: React.SVGProps<SVGGElement>;
             image: React.SVGProps<SVGImageElement>;
-            line: React.SVGProps<SVGLineElement>;
+            line: React.SVGLineElementAttributes<SVGLineElement>;
             linearGradient: React.SVGProps<SVGLinearGradientElement>;
             marker: React.SVGProps<SVGMarkerElement>;
             mask: React.SVGProps<SVGMaskElement>;
@@ -3812,7 +3830,7 @@ declare global {
             stop: React.SVGProps<SVGStopElement>;
             switch: React.SVGProps<SVGSwitchElement>;
             symbol: React.SVGProps<SVGSymbolElement>;
-            text: React.SVGProps<SVGTextElement>;
+            text: React.SVGTextElementAttributes<SVGTextElement>;
             textPath: React.SVGProps<SVGTextPathElement>;
             tspan: React.SVGProps<SVGTSpanElement>;
             use: React.SVGProps<SVGUseElement>;
@@ -3820,3 +3838,16 @@ declare global {
         }
     }
 }
+
+// React.JSX needs to point to global.JSX to keep global module augmentations intact.
+// But we can't access global.JSX so we need to create these aliases instead.
+// Once the global JSX namespace will be removed we replace React.JSX with the contents of global.JSX
+interface GlobalJSXElement extends JSX.Element {}
+interface GlobalJSXElementClass extends JSX.ElementClass {}
+interface GlobalJSXElementAttributesProperty extends JSX.ElementAttributesProperty {}
+interface GlobalJSXElementChildrenAttribute extends JSX.ElementChildrenAttribute {}
+
+interface GlobalJSXIntrinsicAttributes extends JSX.IntrinsicAttributes {}
+interface GlobalJSXIntrinsicClassAttributes<T> extends JSX.IntrinsicClassAttributes<T> {}
+
+interface GlobalJSXIntrinsicElements extends JSX.IntrinsicElements {}

@@ -35,6 +35,9 @@ import * as dns from 'node:dns';
         keepAliveTimeout: 100
     }, reqListener);
 
+    server.close();
+    server[Symbol.asyncDispose]();
+
     // test public props
     const maxHeadersCount: number | null = server.maxHeadersCount;
     const maxRequestsPerSocket: number | null = server.maxRequestsPerSocket;
@@ -343,6 +346,11 @@ import * as dns from 'node:dns';
     http.request({ agent: undefined });
     // ensure compatibility with url.parse()
     http.request(url.parse("http://www.example.org/xyz"));
+
+    // ensure extends from EventEmitter
+    agent.on('free', () => {});
+    agent.once('free', () => {});
+    agent.emit('free');
 }
 
 {
@@ -642,7 +650,7 @@ import * as dns from 'node:dns';
 {
   http.request({ lookup: undefined });
   http.request({ lookup: dns.lookup });
-  http.request({ lookup: (hostname, options, cb) => { cb(null, '', 1); } });
+  http.request({ lookup: (hostname, options, cb) => { cb(null, [{ address: '', family: 1 }]); } });
 }
 
 {
